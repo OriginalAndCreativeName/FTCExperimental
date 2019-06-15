@@ -1,12 +1,13 @@
 package org.firstinspires.ftc.teamcode;
 
-import java.awt.Point;
+import android.graphics.Point;
 
 public abstract class Movement {
     MotionCurve LFrontCurve;
     MotionCurve RFrontCurve;
     MotionCurve LBackCurve;
     MotionCurve RBackCurve;
+    int tolerance = 10;
     Point start;
     Point end;
 

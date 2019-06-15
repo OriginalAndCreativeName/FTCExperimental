@@ -4,11 +4,15 @@ public class TrapezoidalCurve extends MotionCurve{
      float upperLength;
      float slope;
      float slopeLength;
-    TrapezoidalCurve(float b1, float b2, float h){
+     float bias;
+    //gen motion curves based on max accel
+
+    TrapezoidalCurve(float b1, float b2, float h, float minBias){
         maxVal=h;
         length=b1;
         slopeLength=(length-upperLength)/2f;
         slope = maxVal/slopeLength;
+        bias = minBias;
     }
 
     TrapezoidalCurve(float b1, float b2, float h, int leftRight){
@@ -19,17 +23,25 @@ public class TrapezoidalCurve extends MotionCurve{
         //wip code for left/right centered trapezoidal curves
     }
 
+
     @Override
     public float getValue(float x) {
         if(x < slopeLength){
-            return x * slope;
+            if(x * slope > bias){
+                return x * slope;
+            }
+            return bias;
 
         }
-        else if(x < (length-upperLength)/2f +length){
+        else if(x < length - ((length-upperLength)/2f) ){
             return  maxVal;
         }
         else{
-            return  maxVal - x * slope;
+           // if(maxVal - x * slope > bias){
+                return  maxVal - ((x -((length-upperLength)/2f))  * slope);
+          //  }
+
+            //return bias;
         }
     }
 }
