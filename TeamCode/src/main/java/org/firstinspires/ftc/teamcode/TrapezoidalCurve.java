@@ -1,15 +1,16 @@
 package org.firstinspires.ftc.teamcode;
 
 public class TrapezoidalCurve extends MotionCurve{
-     float upperLength;
-     float slope;
-     float slopeLength;
-     float bias;
+     private float upperLength;
+     private float slope;
+     private float slopeLength;
+     private float bias;
     //gen motion curves based on max accel
 
     TrapezoidalCurve(float b1, float b2, float h, float minBias){
         maxVal=h;
         length=b1;
+        upperLength=b2;
         slopeLength=(length-upperLength)/2f;
         slope = maxVal/slopeLength;
         bias = minBias;
