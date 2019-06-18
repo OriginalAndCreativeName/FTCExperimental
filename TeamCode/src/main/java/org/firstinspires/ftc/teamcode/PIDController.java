@@ -31,8 +31,8 @@ public class PIDController {
         }
         float error = target - actual;
         float p = error;
-        i += (float)(error*PIDClock.milliseconds()/1000f);
-        float d = (float)((error-prevError)/ (PIDClock.milliseconds()/1000f));
+        i += (float)(error*PIDClock.seconds());
+        float d = (float)((error-prevError)/ PIDClock.seconds());
         prevError=error;
         PIDClock.reset();
         return kP*p + kI*i + kD*d;
