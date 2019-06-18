@@ -5,40 +5,46 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 
-public class Drivetrain extends Subsystem {
+public class TankDrivetrain extends Subsystem {
     public static final float MAXACCEL = .001f;
     public static final float MAXDEACCEL = 0.0005f;
     private Orientation targetHeading = new Orientation();
     private Orientation currentHeading = new Orientation();
     private Position currentPosition = new Position();
     private Position targetPosition = new Position();
-    OpMode opMode;
-    DcMotorEx lFront;
-    DcMotorEx rFront;
-    DcMotorEx lBack;
-    DcMotorEx rBack;
+    private OpMode opMode;
+    private DcMotorEx lFront;
+    private DcMotorEx rFront;
+    private DcMotorEx lBack;
+    private DcMotorEx rBack;
 
 
-    Drivetrain(){
-
+    TankDrivetrain(){
     }
+
     public void translate (float direction, float distance){
 
     }
+
     public void move(Movement movement){
-        lFront.setPower(movement.LFrontCurve.getValue(lFront.getCurrentPosition()));
-        rFront.setPower(movement.RFrontCurve.getValue(rFront.getCurrentPosition()));
-        lBack.setPower(movement.LFrontCurve.getValue(lFront.getCurrentPosition()));
-        rBack.setPower(movement.RFrontCurve.getValue(rFront.getCurrentPosition()));
-
-        //lBack.setPower(movement.LFrontCurve.getValue(lBack.getCurrentPosition()));
-        //rBack.setPower(movement.RFrontCurve.getValue(rBack.getCurrentPosition()));
-
+        runMotors(
+                movement.RFrontCurve.getValue(getRightPos()),
+                movement.LFrontCurve.getValue(getLeftPos())
+        );
     }
+
+    public int getRightPos(){
+        return (rFront.getCurrentPosition()+rBack.getCurrentPosition())/2;
+    }
+    public int getLeftPos(){
+        return (lFront.getCurrentPosition()+lBack.getCurrentPosition())/2;
+    }
+
     public void resetAllEncoders(){
         lFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -60,11 +66,11 @@ public class Drivetrain extends Subsystem {
         }
     }
 
-    public void runMotors(float rFrontPow,float rBackPow, float lFrontPow, float lBackPow){
-        lFront.setPower(lFrontPow);
-        lBack.setPower(lBackPow);
-        rFront.setPower(rFrontPow);
-        rBack.setPower(rBackPow);
+    public void runMotors(float right,float left){
+        lFront.setPower(Range.clip(left,-1,1));
+        lBack.setPower(Range.clip(left, -1, 1));
+        rFront.setPower(Range.clip(right,-1,1));
+        rBack.setPower(Range.clip(right,-1,1));
     }
 
 
@@ -79,6 +85,7 @@ public class Drivetrain extends Subsystem {
         lBack.setDirection(DcMotor.Direction.REVERSE);
 
         resetAllEncoders();
+        waitAllMotors();
         setAllRunUsingEncoders();
 
 
