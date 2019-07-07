@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode;
+package org.exponential.paths;
 
 public abstract class MotionCurve {
     float maxVal;

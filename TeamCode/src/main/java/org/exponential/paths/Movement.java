@@ -1,12 +1,12 @@
-package org.firstinspires.ftc.teamcode;
+package org.exponential.paths;
 
 import android.graphics.Point;
 
 public abstract class Movement {
-    MotionCurve LFrontCurve;
-    MotionCurve RFrontCurve;
-    MotionCurve LBackCurve;
-    MotionCurve RBackCurve;
+    public MotionCurve LFrontCurve;
+    public MotionCurve RFrontCurve;
+    public MotionCurve LBackCurve;
+    public MotionCurve RBackCurve;
     int tolerance = 10;
     Point start;
     Point end;

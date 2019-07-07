@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode;
+package org.exponential.paths;
 
 public class FlatCurve extends MotionCurve{
     FlatCurve(float curveLength, float max){

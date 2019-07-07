@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode;
+package org.exponential.util;
 
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -7,10 +7,10 @@ public class PIDController {
     private float kI;
     private float kD;
     private ElapsedTime PIDClock;
-    float prevError = 0;
-    float i = 0;
+    private float prevError = 0;
+    private float i = 0;
 
-    PIDController(float kP, float kI, float kD){
+    public PIDController(float kP, float kI, float kD){
         this.kP = kP;
         this.kI = kI;
         this.kD = kD;
