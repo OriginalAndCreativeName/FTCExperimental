@@ -4,6 +4,8 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.Range;
 
+import org.exponential.blueshift.Blueshift;
+
 @TeleOp(name="DriverControlled", group="Teleop")
 
 public class TestTeleOp extends LinearOpMode{
