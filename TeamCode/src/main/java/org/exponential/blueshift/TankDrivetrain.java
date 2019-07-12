@@ -24,8 +24,8 @@ import org.openftc.revextensions2.ExpansionHubMotor;
 
 public class TankDrivetrain extends Drivetrain {
     Robot robot;
-    public static final float MAXACCEL = .013f;
-    public static final float MAXDEACCEL = 0.0006f;
+    public static final float MAXACCEL = .015f;
+    public static final float MAXDEACCEL = 0.0008f;
     public static final float TRACKWIDTHIN = 16.75f;
     public static final float COUNTSPERREV = 537.6f;
     //private Orientation targetHeading = new Orientation();
@@ -50,14 +50,16 @@ public class TankDrivetrain extends Drivetrain {
     public void translate (float direction, float distance){
 
     }
+    @Override
     public float encoderToInch(int encoder){
-        float revs = (float)(encoder)/COUNTSPERREV;
+        float revs = (24f/22f) * (float)(encoder)/COUNTSPERREV;
         float distance = (float) (revs * 4f * Math.PI);
         return distance;
     }
+    @Override
     public int inchToEncoder(float inches){
         float revs = (float)(inches /  (4f * Math.PI));
-        float encoder = revs * COUNTSPERREV;
+        float encoder = revs * COUNTSPERREV * (22f/24f);
         return Math.round(encoder);
 
     }
@@ -110,7 +112,7 @@ public class TankDrivetrain extends Drivetrain {
         opMode.telemetry.addData("Heading", currentHeading.firstAngle - initialHeading);
     }
 
-    public void moveIMUPath(Path path){
+    public void movePath(Path path){
         if(headingController == null){
             //.0004
             headingController = new PIDController(.013f ,0.004f ,.0003f);
@@ -144,6 +146,42 @@ public class TankDrivetrain extends Drivetrain {
         );
         opMode.telemetry.addData("Heading", currentHeading.firstAngle - initialHeading);
     }
+
+    public void movePath(Path path, int units){
+        if(headingController == null){
+            //.0004
+            headingController = new PIDController(.013f ,0.004f ,.0003f);
+            headingController.start();
+        }
+        updateOrientation();
+        float position = (getRightPos() + getLeftPos())/2;
+        float targetHeading = path.getHeading(position);
+        float correction =  headingController.getValue(0, AngleUnit.normalizeDegrees(currentHeading.firstAngle - initialHeading - targetHeading));
+        //correction = 0;
+        float power = path.getPower(position);
+        float FFLeft=0;
+        float FFRight=0;
+
+        if(path.getCurrentPathComponent(position).getDegrees()>0){
+            float radius = ((Arc)(path.getCurrentPathComponent(position))).getRadius();
+            FFLeft = power * (encoderToInch(Math.round(radius)) - TRACKWIDTHIN/2f) / (encoderToInch(Math.round(radius)) + TRACKWIDTHIN/2f);
+            FFLeft = FFLeft-power;
+            FFLeft =0;
+        }
+        else if (path.getCurrentPathComponent(position).getDegrees()<0){
+            float radius = ((Arc)(path.getCurrentPathComponent(position))).getRadius();
+            FFRight = power * (encoderToInch(Math.round(radius)) - TRACKWIDTHIN/2f) / (encoderToInch(Math.round(radius)) + TRACKWIDTHIN/2f);
+            FFRight = FFRight-power;
+            FFRight =0;
+
+        }
+        runMotors(
+                power + FFRight + correction /* (3f/4f + power/(4f*path.getMaxPower()))*/,
+                power + FFLeft - correction /* (3f/4f + power/(4f*path.getMaxPower()))*/
+        );
+        opMode.telemetry.addData("Heading", currentHeading.firstAngle - initialHeading);
+    }
+
 
     public void driveIMU(float targetHeading, float power){
         if(headingController == null){

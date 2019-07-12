@@ -1,9 +1,19 @@
 package org.exponential.paths;
 
+import org.exponential.util.OdometryMath;
+
 public class Line extends PathComponent{
     public float distance;
     public Line(float distance){
-        this.distance = distance;
+        this.distance = OdometryMath.inchToEncoder(distance);
+    }
+    public Line(float distance, int units){
+        if(units==Path.ENCODER){
+            this.distance = distance;
+        }
+        else if(units==Path.INCH){
+            this.distance = OdometryMath.inchToEncoder(distance);
+        }
     }
 
     @Override

@@ -1,7 +1,11 @@
 package org.exponential.paths;
 
 
+import org.exponential.superclasses.Drivetrain;
+
 public class Path {
+    public static final int ENCODER=0;
+    public static final int INCH=1;
     PathComponent[] pathComponents;
     TrapezoidalCurve motorCurve;
     public Path(PathComponent[] pathComponents, float accel, float deaccel, float max, float bias){

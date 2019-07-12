@@ -6,25 +6,19 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import org.exponential.blueshift.Blueshift;
 import org.exponential.paths.Arc;
 import org.exponential.paths.Line;
-import org.exponential.paths.LinearMovement;
 import org.exponential.paths.Path;
 import org.exponential.paths.PathComponent;
 
-@Autonomous(name="TestPaths", group="Autonomous")
+@Autonomous(name="TestPathsCircle", group="Autonomous")
 
-public class TestPaths extends LinearOpMode {
+public class TestPathsCircle extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         PathComponent[] pathComponents=
                 {
-                        new Line(750, Path.ENCODER),
-                        new Arc(750, 90, Path.ENCODER),
-                        new Line(750, Path.ENCODER),
-                        new Arc(750, 90, Path.ENCODER),
-                        new Line(750, Path.ENCODER),
-                        new Arc(750, 90, Path.ENCODER),
-                        new Line(750, Path.ENCODER),
-                        new Arc(750, 90, Path.ENCODER)
+                        new Arc(1500, 90),
+                        new Arc(1500, 90),
+                        new Arc(1500, 180),
                 };
         Path path = new Path(pathComponents, Blueshift.drivetrain.MAXACCEL, Blueshift.drivetrain.MAXDEACCEL, .3f, .1f);
 
