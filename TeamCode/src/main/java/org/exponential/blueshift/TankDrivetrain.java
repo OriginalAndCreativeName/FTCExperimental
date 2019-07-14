@@ -112,7 +112,7 @@ public class TankDrivetrain extends Drivetrain {
         opMode.telemetry.addData("Heading", currentHeading.firstAngle - initialHeading);
     }
 
-    public void movePath(Path path){
+    public boolean movePath(Path path){
         if(headingController == null){
             //.0004
             headingController = new PIDController(.013f ,0.004f ,.0003f);
@@ -144,7 +144,15 @@ public class TankDrivetrain extends Drivetrain {
                 power + FFRight + correction /* (3f/4f + power/(4f*path.getMaxPower()))*/,
                 power + FFLeft - correction /* (3f/4f + power/(4f*path.getMaxPower()))*/
         );
-        opMode.telemetry.addData("Heading", currentHeading.firstAngle - initialHeading);
+        opMode.telemetry.addData("Error", AngleUnit.normalizeDegrees(currentHeading.firstAngle - initialHeading - targetHeading));
+        //opMode.telemetry.addData("Heading", currentHeading.firstAngle - initialHeading);
+        if(Math.abs(position-path.getDistance())<10 && Math.abs(AngleUnit.normalizeDegrees(currentHeading.firstAngle - initialHeading - targetHeading))<.5){
+            return true;
+        }
+        else{
+            return false;
+        }
+
     }
 
     public void movePath(Path path, int units){

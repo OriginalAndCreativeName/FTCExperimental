@@ -44,6 +44,9 @@ public class Path {
             return pathComponents[i-1];
         }
     }
+    public float getDistance(){
+        return motorCurve.getLength();
+    }
 
     public float getPower(float distance){
         return motorCurve.getValue(distance);
