@@ -35,10 +35,10 @@ public class PIDTuner extends LinearOpMode {
                 }
                 else if(gamepad1.b){
                     if(gamepad1.dpad_up==true && upPrev==false){
-                        i+=.001;
+                        d+=.001;
                     }
                     if(gamepad1.dpad_down==true && downPrev==false){
-                        i-=.001;
+                        d-=.001;
                     }
                 }
                 telemetry.update();

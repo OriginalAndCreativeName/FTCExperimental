@@ -18,15 +18,15 @@ public class TestPaths extends LinearOpMode {
         PathComponent[] pathComponents=
                 {
                         new Line(750, Path.ENCODER),
-                        new Arc(750, 90, Path.ENCODER),
+                        new Arc(24, 90, Path.INCH),
                         new Line(750, Path.ENCODER),
-                        new Arc(750, 90, Path.ENCODER),
+                        new Arc(24, 90, Path.INCH),
                         new Line(750, Path.ENCODER),
-                        new Arc(750, 90, Path.ENCODER),
+                        new Arc(24, 90, Path.INCH),
                         new Line(750, Path.ENCODER),
-                        new Arc(750, 90, Path.ENCODER)
+                        new Arc(24, 90, Path.INCH)
                 };
-        Path path = new Path(pathComponents, Blueshift.drivetrain.MAXACCEL, Blueshift.drivetrain.MAXDEACCEL, .3f, .1f);
+        Path path = new Path(pathComponents, Blueshift.drivetrain.MAXACCEL, Blueshift.drivetrain.MAXDEACCEL, .35f, .1f);
 
         Blueshift.initialize(this);
         Blueshift.drivetrain.initializeIMU();

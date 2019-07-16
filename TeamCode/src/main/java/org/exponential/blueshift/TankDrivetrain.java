@@ -2,9 +2,13 @@ package org.exponential.blueshift;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
+import com.qualcomm.hardware.lynx.LynxEmbeddedIMU;
+import com.qualcomm.hardware.lynx.LynxI2cDeviceSynchV1;
+import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.I2cDeviceSynch;
 import com.qualcomm.robotcore.util.Range;
 
 import org.exponential.paths.Arc;
@@ -13,6 +17,7 @@ import org.exponential.paths.Movement;
 import org.exponential.paths.Path;
 import org.exponential.superclasses.Drivetrain;
 import org.exponential.superclasses.Robot;
+import org.exponential.util.BetterI2cDeviceSynchImplOnSimple;
 import org.exponential.util.PIDController;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -20,12 +25,13 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
+import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
 import org.openftc.revextensions2.ExpansionHubMotor;
 
 public class TankDrivetrain extends Drivetrain {
     Robot robot;
     public static final float MAXACCEL = .015f;
-    public static final float MAXDEACCEL = 0.0008f;
+    public static final float MAXDEACCEL = 0.0006f;
     public static final float TRACKWIDTHIN = 16.75f;
     public static final float COUNTSPERREV = 537.6f;
     //private Orientation targetHeading = new Orientation();
@@ -42,6 +48,8 @@ public class TankDrivetrain extends Drivetrain {
     float initialPitch;
     float initialRoll;
     PIDController headingController;
+    float prevLeft;
+    float prevRight;
     //Orientation orientation = new Orientation();
 
     TankDrivetrain(){
@@ -115,7 +123,9 @@ public class TankDrivetrain extends Drivetrain {
     public boolean movePath(Path path){
         if(headingController == null){
             //.0004
-            headingController = new PIDController(.013f ,0.004f ,.0003f);
+            headingController = new PIDController(.013f ,0.002f ,.00000f);
+
+            //headingController = new PIDController(.016f ,0.000f ,.0000f);
             headingController.start();
         }
         updateOrientation();
@@ -127,11 +137,35 @@ public class TankDrivetrain extends Drivetrain {
         float FFLeft=0;
         float FFRight=0;
 
+        /*
+        if(path.getCurrentPathComponent(position).getDegrees()>0){
+            float radius = ((Arc)(path.getCurrentPathComponent(position))).getRadius();
+            FFLeft = power * (encoderToInch(Math.round(radius)) - TRACKWIDTHIN/2f) / (encoderToInch(Math.round(radius)));
+            FFRight = power * (encoderToInch(Math.round(radius)) + TRACKWIDTHIN/2f) / (encoderToInch(Math.round(radius)));
+            FFLeft = FFLeft-power;
+            FFRight = FFRight-power;
+            //FFLeft =0;
+        }
+        else if (path.getCurrentPathComponent(position).getDegrees()<0){
+            float radius = ((Arc)(path.getCurrentPathComponent(position))).getRadius();
+            FFLeft = power * (encoderToInch(Math.round(radius)) + TRACKWIDTHIN/2f) / (encoderToInch(Math.round(radius)));
+            FFRight = power * (encoderToInch(Math.round(radius)) - TRACKWIDTHIN/2f) / (encoderToInch(Math.round(radius)));
+            FFLeft = FFLeft-power;
+            FFRight = FFRight-power;
+            //FFRight =0;
+
+        }
+        else{
+            FFLeft=0;
+            FFRight=0;
+        }
+        */
         if(path.getCurrentPathComponent(position).getDegrees()>0){
             float radius = ((Arc)(path.getCurrentPathComponent(position))).getRadius();
             FFLeft = power * (encoderToInch(Math.round(radius)) - TRACKWIDTHIN/2f) / (encoderToInch(Math.round(radius)) + TRACKWIDTHIN/2f);
             FFLeft = FFLeft-power;
             FFLeft =0;
+
         }
         else if (path.getCurrentPathComponent(position).getDegrees()<0){
             float radius = ((Arc)(path.getCurrentPathComponent(position))).getRadius();
@@ -140,9 +174,10 @@ public class TankDrivetrain extends Drivetrain {
             FFRight =0;
 
         }
+
         runMotors(
-                power + FFRight + correction /* (3f/4f + power/(4f*path.getMaxPower()))*/,
-                power + FFLeft - correction /* (3f/4f + power/(4f*path.getMaxPower()))*/
+                power + FFRight/4f + correction * (3f/4f + power/(4f*path.getMaxPower())),
+                power + FFLeft/4f - correction * (3f/4f + power/(4f*path.getMaxPower()))
         );
         opMode.telemetry.addData("Error", AngleUnit.normalizeDegrees(currentHeading.firstAngle - initialHeading - targetHeading));
         //opMode.telemetry.addData("Heading", currentHeading.firstAngle - initialHeading);
@@ -153,41 +188,6 @@ public class TankDrivetrain extends Drivetrain {
             return false;
         }
 
-    }
-
-    public void movePath(Path path, int units){
-        if(headingController == null){
-            //.0004
-            headingController = new PIDController(.013f ,0.004f ,.0003f);
-            headingController.start();
-        }
-        updateOrientation();
-        float position = (getRightPos() + getLeftPos())/2;
-        float targetHeading = path.getHeading(position);
-        float correction =  headingController.getValue(0, AngleUnit.normalizeDegrees(currentHeading.firstAngle - initialHeading - targetHeading));
-        //correction = 0;
-        float power = path.getPower(position);
-        float FFLeft=0;
-        float FFRight=0;
-
-        if(path.getCurrentPathComponent(position).getDegrees()>0){
-            float radius = ((Arc)(path.getCurrentPathComponent(position))).getRadius();
-            FFLeft = power * (encoderToInch(Math.round(radius)) - TRACKWIDTHIN/2f) / (encoderToInch(Math.round(radius)) + TRACKWIDTHIN/2f);
-            FFLeft = FFLeft-power;
-            FFLeft =0;
-        }
-        else if (path.getCurrentPathComponent(position).getDegrees()<0){
-            float radius = ((Arc)(path.getCurrentPathComponent(position))).getRadius();
-            FFRight = power * (encoderToInch(Math.round(radius)) - TRACKWIDTHIN/2f) / (encoderToInch(Math.round(radius)) + TRACKWIDTHIN/2f);
-            FFRight = FFRight-power;
-            FFRight =0;
-
-        }
-        runMotors(
-                power + FFRight + correction /* (3f/4f + power/(4f*path.getMaxPower()))*/,
-                power + FFLeft - correction /* (3f/4f + power/(4f*path.getMaxPower()))*/
-        );
-        opMode.telemetry.addData("Heading", currentHeading.firstAngle - initialHeading);
     }
 
 
@@ -235,10 +235,16 @@ public class TankDrivetrain extends Drivetrain {
     }
 
     public void runMotors(float right,float left){
-        lFront.setPower(Range.clip(left,-1,1));
-        lBack.setPower(Range.clip(left, -1, 1));
-        rFront.setPower(Range.clip(right,-1,1));
-        rBack.setPower(Range.clip(right,-1,1));
+        if(prevLeft!=left){
+            lFront.setPower(Range.clip(left,-1,1));
+            lBack.setPower(Range.clip(left, -1, 1));
+        }
+        if(prevRight!=right){
+            rFront.setPower(Range.clip(right,-1,1));
+            rBack.setPower(Range.clip(right,-1,1));
+        }
+        prevLeft = left;
+        prevRight = right;
     }
 
     public void initializeIMU() {
@@ -284,6 +290,12 @@ public class TankDrivetrain extends Drivetrain {
         resetAllEncoders();
         waitAllMotors();
         setAllRunUsingEncoders();
-        imu = opMode.hardwareMap.get(BNO055IMU.class, "imu");
+        LynxModule module = opMode.hardwareMap.get(LynxModule.class, "Expansion Hub 1");
+        I2cDeviceSynch idkWhatThisMeans = new BetterI2cDeviceSynchImplOnSimple(
+                new LynxI2cDeviceSynchV1(AppUtil.getDefContext(), module, 0), true);
+        imu = new LynxEmbeddedIMU(idkWhatThisMeans);
+        imu.initialize(new BNO055IMU.Parameters());
+
+        //imu = opMode.hardwareMap.get(BNO055IMU.class, "imu");
     }
 }

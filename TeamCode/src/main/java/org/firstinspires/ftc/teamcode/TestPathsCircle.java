@@ -16,9 +16,11 @@ public class TestPathsCircle extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         PathComponent[] pathComponents=
                 {
-                        new Arc(1500, 90),
-                        new Arc(1500, 90),
-                        new Arc(1500, 180),
+                        new Arc(30, 90),
+                        new Arc(30, 90),
+                        new Arc(30, 180),
+                        new Arc(30, 360),
+
                 };
         Path path = new Path(pathComponents, Blueshift.drivetrain.MAXACCEL, Blueshift.drivetrain.MAXDEACCEL, .3f, .1f);
 
